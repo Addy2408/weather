@@ -1,46 +1,82 @@
-const options = {
-	method: 'GET',
-	headers: {
-		'X-RapidAPI-Key': 'fcac5d243amsh341cf29dddc80f4p16b9edjsn5bf5eecbc3ad',
-		'X-RapidAPI-Host': 'weather-by-api-ninjas.p.rapidapi.com'
-	}
-};
+const API_KEY = '85548261cbb59d0320841f4bf8d95789';
 
-const getweather = (city)=>{
-fetch('https://weather-by-api-ninjas.p.rapidapi.com/v1/weather?city=' + city, options)
-	.then(response => response.json())
-	.then(response => {
+const getWeatherData=(city)=>{
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`).then(res => {
+        if(res.status === 200){
+            return res.json()
+        }
+        else{
+            alert("Please Enter a valid City Name")
+        }
+    }).then(data=>{
+        console.log(data);
+        showWeatherData(data);
+    })
+}
+getWeatherData("Delhi");
 
-		city_name.innerHTML=city
-		
-		console.log(response)
-		temp.innerHTML=response.temp 
-		humidity.innerHTML=response.humidity 
-		min_temp.innerHTML=response.min_temp 
-		max_temp.innerHTML=response.max_temp 
-		wind_speed.innerHTML=response.wind_speed 
-		wind_degrees.innerHTML=response.wind_degrees 
+document.getElementById('city_name').innerHTML = "Delhi";
 
-		time = (timestamp) =>{
-			var date = new Date(timestamp*1000)
-			var hours = date.getHours()
-			var minutes = "0"+date.getMinutes()
-			var seconds = "0"+date.getSeconds()
-			var format_time = hours+":"+minutes.substr(-2)+":"+seconds.substr(-2)
-			return format_time
-		}
-		sr = response.sunrise
-		sunrise.innerHTML=time(sr)
-		ss = response.sunset
-		sunset.innerHTML=time(ss)
+function showWeatherData(data){
+    let {humidity, pressure, temp, temp_max, temp_min, feels_like}= data.main;
+    let {sunrise, sunset} = data.sys;
+    let {deg, speed} = data.wind;
 
-	})
-	.catch(err => console.error(err));
+    document.getElementById('temp').innerHTML=temp;
+    document.getElementById('min_temp').innerHTML=temp_max;
+    document.getElementById('max_temp').innerHTML=temp_min;
+    document.getElementById('humidity').innerHTML=humidity;
+    document.getElementById('pressure').innerHTML=pressure;
+    document.getElementById('feels_like').innerHTML=feels_like;
+    document.getElementById('sunrise').innerHTML=timeformat(sunrise);
+    document.getElementById('sunset').innerHTML=timeformat(sunset);
+    document.getElementById('wind_degree').innerHTML=degToCompass(deg);
+    document.getElementById('wind_speed').innerHTML=speed;
+
+    function timeformat(timestamp){
+        var datetime = new Date(timestamp * 1000);  
+        return datetime.toLocaleTimeString();
+    }
+    function degToCompass(num) {
+        var val = Math.floor((num / 22.5) + 0.5);
+        var arr = ["N", "N-NE", "NE", "E-NE", "E", "E-SE", "SE", "S-SE", "S", "S-SW", "SW", "W-SW", "W", "W-NW", "NW", "N-NW"];
+        return arr[(val % 16)];
+    }
 }
 
-submit.addEventListener("click",(e)=>{
-	e.preventDefault()
-	getweather(city.value)
+
+document.getElementById('search').addEventListener('click',(e)=>{
+    e.preventDefault()
+    if(city.value == ""){
+        alert("Please Enter a City Name !")
+    }
+    else{
+        document.getElementById('city_name').innerHTML=city.value;
+        getWeatherData(city.value)
+    }
 })
 
-getweather("Delhi")
+document.getElementById('greet').innerHTML=greeting();
+
+function greeting(){
+    let date=new Date()
+    let hours= date.getHours()
+    if(hours>=0 && hours<12)
+    return "Good Morning"
+    else if(hours>=12 && hours<16)
+    return "Good Afternoon"
+    else
+    return "Good Evening"
+}
+
+// let date = new Date()
+// let hours = date.getHours()
+
+// if (hours>=0 && hours<12) {
+//     greetings.innerHTML="Good Morning"
+    
+// } else if (hours>=12 && hours<16) {
+//     greetings.innerHTML="Good Afternoon"
+// } else {
+//     greetings.innerHTML="Good Evening"
+// }
